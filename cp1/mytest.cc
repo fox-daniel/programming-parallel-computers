@@ -7,6 +7,17 @@
 // Your correlate function
 void correlate(int ny, int nx, const float *data, float *result);
 
+// Utility function to print a vector
+void print_vector(const char* name, const std::vector<double>& vec) {
+    std::cout << name << " [" << vec.size() << "]: ";
+    for (size_t i = 0; i < vec.size(); i++) {
+        std::cout << std::fixed << std::setprecision(6) << vec[i];
+        if (i < vec.size() - 1) std::cout << ", ";
+    }
+    std::cout << "\n";
+}
+
+
 void print_matrix(const char* name, int rows, int cols, const float* data) {
     std::cout << name << " (" << rows << "x" << cols << "):\n";
     for (int i = 0; i < rows; i++) {
@@ -25,7 +36,7 @@ int main() {
     {
         int ny = 2, nx = 2;
         float data[] = {
-            1.0f, 1.0f,   // row 0
+            -1.0f, 1.0f,   // row 0
             -1.0f, 1.0f    // row 1
         };
         float result[4] = {0};  // ny * ny = 2 * 2 = 4

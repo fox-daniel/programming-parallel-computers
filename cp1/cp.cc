@@ -1,25 +1,25 @@
-#include <iostream>
 #include <vector>
-#include <iomanip>
-
-// Utility function to print a vector
-void print_vector(const char* name, const std::vector<double>& vec) {
-    std::cout << name << " [" << vec.size() << "]: ";
-    for (size_t i = 0; i < vec.size(); i++) {
-        std::cout << std::fixed << std::setprecision(6) << vec[i];
-        if (i < vec.size() - 1) std::cout << ", ";
-    }
-    std::cout << "\n";
-}
+#include <cmath>
 
 
-void normalize_row(int a, int nx, const float *data, std::vector<double> row) {
-    double sum = 0;
+void normalize_row(int a, int nx, const float *data, std::vector<double>& row) {
+    double mean = 0;
+    double len = 0;
     for (int k=0; k<nx; k++) {
-        sum += data[k + a*nx];
+        mean += data[k + a*nx];
     }
+    mean = mean / nx;
     for (int k=0; k<nx; k++) {
-        row[k] = data[k+ a*nx] - sum/nx;
+        row[k] = data[k+ a*nx] - mean;
+   }
+    for (int k=0; k<nx; k++) {
+        len += row[k]*row[k];
+    }
+    len = sqrt(len);
+    // std::cout << "stdev:" << std::endl;
+    // std::cout << len << std::endl;
+    for (int k=0; k<nx; k++) {
+        row[k] = row[k]/len;
     }
 }
 
@@ -30,8 +30,8 @@ float correlate_rows(int a, int b, int nx, const float *data) {
     std::vector<double> row2(nx);
     normalize_row(a, nx, data, row1);
     normalize_row(b, nx, data, row2);
-    print_vector("row1", row1);
-    print_vector("row2", row2);
+    // print_vector("row1", row1);
+    // print_vector("row2", row2);
     for (int i=0; i<nx; i++) {
         correlation += row1[i]*row2[i];
     }
