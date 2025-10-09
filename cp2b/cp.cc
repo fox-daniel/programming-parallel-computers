@@ -1,4 +1,5 @@
 #include <vector>
+#include <tuple>
 #include <cmath>
 // #include </opt/homebrew/opt/libomp/include/omp.h>
 
@@ -44,16 +45,39 @@ This is the function you need to implement. Quick reference:
 */
 void correlate(int ny, int nx, const float *data, float *result) {
     std::vector<double> normalized(ny*nx);
+    #pragma omp parallel for schedule(dynamic, 8)
     for (int i=0; i<ny; i++) {
         normalize_rows(i, nx, data, normalized);
     }
-    #pragma omp parallel for schedule(static, 1)
     // schedule(static, 1) is likely important here because the inner for loop is
     // bounded by the outer for loop index, creating uneven work loads without
     // proper scheduling.
-    for (int i=0; i<ny; i++) {
-        for (int j=0; j<=i; j++) {
-            result[i+j*ny] = correlate_rows(i, j, nx, normalized);
-        }
-    }
+    // Version 1: Passes
+    // #pragma omp parallel for schedule(static, 1)
+    // for (int i=0; i<ny; i++) {
+    //     for (int j=0; j<=i; j++) {
+    //         result[i+j*ny] = correlate_rows(i, j, nx, normalized);
+    //     }
+    // }
+    // Version 2: create one for loop for better scheduling?
+    // create an array of tuples [(i,j)] for all index pairs needed.
+    // Then use a single for loop and array lookup.
+    // int num_iterations = ny*(ny+1)/2;
+    // std::vector<std::tuple<int, int>> index_array(num_iterations);
+    // int k = 0;
+    // #pragma omp parallel for schedule(static, 1)
+    // for (int i=0; i<ny; i++) {
+    //     for (int j=0; j<=i; j++) {
+    //         index_array[k] = {i,j};
+    //         k += 1;
+    //     }
+    // }
+    // int i;
+    // int j;
+    // #pragma omp parallel for schedule(static, 1)
+    // for (int k=0; k<num_iterations; k++) {
+    //     i = std::get<0>(index_array[k]);
+    //     j = std::get<1>(index_array[k]);
+    //     result[i+j*ny] = correlate_rows(i, j, nx, normalized);
+    // }
 }
