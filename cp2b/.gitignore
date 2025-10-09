@@ -2,3 +2,5 @@ __pycache__/
 cp
 cp-demo
 out.png
+.DS_Store
+cp.dSYM/
