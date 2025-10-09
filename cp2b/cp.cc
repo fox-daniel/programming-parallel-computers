@@ -49,10 +49,15 @@ void correlate(int ny, int nx, const float *data, float *result) {
     for (int i=0; i<ny; i++) {
         normalize_rows(i, nx, data, normalized);
     }
-    #pragma omp parallel for schedule(static, 1)
-    for (int i=0; i<ny; i++) {
-        for (int j=0; j<=i; j++) {
-            result[i+j*ny] = correlate_rows(i, j, nx, normalized);
+    int BLOCK = 100;
+    #pragma omp parallel for schedule(dynamic, 1)
+    for (int ii=0; ii<ny; ii+=BLOCK) {
+        for (int jj=0; jj<=ii; jj+=BLOCK) {
+            for (int i=0; i<std::min(ii+BLOCK, ny); i++) {
+                for (int j=0; j<std::min(jj+BLOCK, i+1); j++) {
+                    result[i+j*ny] = correlate_rows(i, j, nx, normalized);
+                }
+            }
         }
     }
 }
