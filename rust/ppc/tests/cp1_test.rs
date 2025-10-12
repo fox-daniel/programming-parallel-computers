@@ -1,4 +1,5 @@
 use ppc::data_generator;
+use std::time::Instant;
 
 #[test]
 fn cp1_test_1() {
@@ -8,7 +9,7 @@ fn cp1_test_1() {
     let data: Vec<f32> = vec![1., -1., -1., 1.];
     let mut result = vec![0.0f32; ny * ny];
     correlate(ny, nx, &data, &mut result);
-    println!("result={:#?}", result);
+    // println!("result={:#?}", result);
     assert!(result[1] < 0.0);
     assert_eq!(result[0], 1.);
     assert_eq!(result[3], 1.);
@@ -22,6 +23,21 @@ fn cp1_test_2() {
     let data = data_generator(ny, nx);
     let mut result = vec![0.0f32; ny * ny];
     correlate(ny, nx, &data, &mut result);
+    assert_eq!(result[0], 1.);
+    assert!(result[1] != 0.0);
+}
+
+#[test]
+fn cp1_test_3() {
+    use ppc::cp1::correlate;
+    let ny = 800;
+    let nx = 800;
+    let data = data_generator(ny, nx);
+    let mut result = vec![0.0f32; ny * ny];
+    let start = Instant::now();
+    correlate(ny, nx, &data, &mut result);
+    let duration = start.elapsed();
+    println!("cp1_test_3 duration = {duration:?}");
     assert_eq!(result[0], 1.);
     assert!(result[1] != 0.0);
 }
