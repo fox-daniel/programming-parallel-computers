@@ -3,6 +3,7 @@ use ndarray_rand::RandomExt;
 use rand_distr::Uniform;
 
 pub mod cp1;
+pub mod cp2a;
 
 pub fn data_generator(row_size: usize, column_size: usize) -> Vec<f32> {
     Array1::random(row_size * column_size, Uniform::new(-100., 100.)).to_vec()

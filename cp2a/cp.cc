@@ -13,6 +13,11 @@
  *
  * The increase of unwinding from 4 to 8 has a
  * bigger impact on my Mac than the Linux machines used in the online grader.
+ *
+ *
+ * Modifications:
+ * - pass the correlation vector to correlate_rows instead of initializing in each loop: no significant difference
+ *
  */
 
 void normalize_rows(int a, int nx, const float *data, std::vector<double>& normalized) {
@@ -41,12 +46,12 @@ void normalize_rows(int a, int nx, const float *data, std::vector<double>& norma
 
 float correlate_rows(int a, int b, int nx, std::vector<double>& normalized) {
     double total_correlation = 0;
+    const int unwind = 8;
+    std::vector<double> correlation(unwind+1);
     // unwinding factor of 8 is slightly better than 4 in the online eval (4'13" vs 4'24")
-    const int w = 8;
-    int m = nx / w;
-    std::vector<double> correlation(w+1);
+    int m = nx / unwind;
     // initialize the chunks of the correlation
-    for (int j=0; j<w; j++) {
+    for (int j=0; j<unwind; j++) {
         correlation[j] = 0;
     }
 
@@ -54,18 +59,18 @@ float correlate_rows(int a, int b, int nx, std::vector<double>& normalized) {
     int start = 0;
     int finish = m;
     for (int i=start; i<finish; i++) {
-        for (int j=0; j<w; j++) {
-            correlation[j] += normalized[w*i + j + nx*a]*normalized[w*i + j + nx*b];
+        for (int j=0; j<unwind; j++) {
+            correlation[j] += normalized[unwind*i + j + nx*a]*normalized[unwind*i + j + nx*b];
         }
     }
     // calculate remaining chunk of correlation
-    start = w*m;
+    start = unwind*m;
     finish = nx;
     for (int i=start; i<finish; i++) {
-        correlation[w] += normalized[i+nx*a]*normalized[i+nx*b];
+        correlation[unwind] += normalized[i+nx*a]*normalized[i+nx*b];
     }
     // combine chunks
-    for (int j=0; j<=w; j++) {
+    for (int j=0; j<=unwind; j++) {
         total_correlation += correlation[j];
     }
     return total_correlation;

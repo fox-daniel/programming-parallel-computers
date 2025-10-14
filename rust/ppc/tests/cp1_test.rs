@@ -16,28 +16,22 @@ fn cp1_test_1() {
 }
 
 #[test]
-fn cp1_test_2() {
-    use ppc::cp1::correlate;
-    let ny = 2;
-    let nx = 2;
+fn test_cp1vcp2a() {
+    use ppc::cp1;
+    use ppc::cp2a;
+    let ny = 100;
+    let nx = 100;
     let data = data_generator(ny, nx);
-    let mut result = vec![0.0f32; ny * ny];
-    correlate(ny, nx, &data, &mut result);
-    assert_eq!(result[0], 1.);
-    assert!(result[1] != 0.0);
-}
-
-#[test]
-fn cp1_test_3() {
-    use ppc::cp1::correlate;
-    let ny = 800;
-    let nx = 800;
-    let data = data_generator(ny, nx);
-    let mut result = vec![0.0f32; ny * ny];
+    let mut result_1 = vec![0.0f32; ny * ny];
     let start = Instant::now();
-    correlate(ny, nx, &data, &mut result);
-    let duration = start.elapsed();
-    println!("cp1_test_3 duration = {duration:?}");
-    assert_eq!(result[0], 1.);
-    assert!(result[1] != 0.0);
+    cp1::correlate(ny, nx, &data, &mut result_1);
+    let duration_1 = start.elapsed();
+    println!("test_4 (cp1) duration = {duration_1:?}");
+
+    let mut result_2 = vec![0.0f32; ny * ny];
+    let start = Instant::now();
+    cp2a::correlate(ny, nx, &data, &mut result_2);
+    let duration_2 = start.elapsed();
+    println!("test_4 (cp2a) duration = {duration_2:?}");
+    assert_eq!(result_1, result_2);
 }
