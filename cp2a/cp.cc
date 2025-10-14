@@ -17,10 +17,11 @@
  *
  * Modifications:
  * - pass the correlation vector to correlate_rows instead of initializing in each loop: no significant difference
- *
+ * - use double *normalized[] instead of std::vector: small improvement in speed
+ * - using for loop with update of i += unwind like Joseph does actually made it slower: 4:00 -> 4:20
  */
 
-void normalize_rows(int a, int nx, const float *data, std::vector<double>& normalized) {
+void normalize_rows(int a, int nx, const float *data, double *normalized) {
     double mean = 0;
     double len = 0;
     asm("# begin mean");
@@ -44,28 +45,26 @@ void normalize_rows(int a, int nx, const float *data, std::vector<double>& norma
 }
 
 
-float correlate_rows(int a, int b, int nx, std::vector<double>& normalized) {
+float correlate_rows(int a, int b, int nx, double *normalized) {
     double total_correlation = 0;
     const int unwind = 8;
     std::vector<double> correlation(unwind+1);
     // unwinding factor of 8 is slightly better than 4 in the online eval (4'13" vs 4'24")
-    int m = nx / unwind;
+    int nxw = floor(nx / unwind);
     // initialize the chunks of the correlation
     for (int j=0; j<unwind; j++) {
         correlation[j] = 0;
     }
 
     // calculate chunks of correlation
-    int start = 0;
-    int finish = m;
-    for (int i=start; i<finish; i++) {
+    for (int i=0; i<nxw; i++) {
         for (int j=0; j<unwind; j++) {
-            correlation[j] += normalized[unwind*i + j + nx*a]*normalized[unwind*i + j + nx*b];
+            correlation[j] += normalized[i*unwind + j + nx*a]*normalized[i*unwind + j + nx*b];
         }
     }
     // calculate remaining chunk of correlation
-    start = unwind*m;
-    finish = nx;
+    int start = unwind*nxw;
+    int finish = nx;
     for (int i=start; i<finish; i++) {
         correlation[unwind] += normalized[i+nx*a]*normalized[i+nx*b];
     }
@@ -73,7 +72,7 @@ float correlate_rows(int a, int b, int nx, std::vector<double>& normalized) {
     for (int j=0; j<=unwind; j++) {
         total_correlation += correlation[j];
     }
-    return total_correlation;
+    return (float)total_correlation;
 }
 
 /*
@@ -85,7 +84,8 @@ This is the function you need to implement. Quick reference:
 - only parts with 0 <= j <= i < ny need to be filled
 */
 void correlate(int ny, int nx, const float *data, float *result) {
-    std::vector<double> normalized(ny*nx);
+    // std::vector<double> normalized(ny*nx);
+    double *normalized = new double[ny*nx]{};
     for (int i=0; i<ny; i++) {
         normalize_rows(i, nx, data, normalized);
     }
@@ -95,4 +95,5 @@ void correlate(int ny, int nx, const float *data, float *result) {
             result[i+j*ny] = correlate_rows(i, j, nx, normalized);
         }
     }
+    delete[] normalized;
 }

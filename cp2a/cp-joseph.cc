@@ -43,6 +43,9 @@ void correlate(int ny, int nx, const float *data, float *result) {
           sum[k] += norm[x + k + yi * nx_p] * norm[x + k + yj * nx_p];
         }
       }
+      // Fox:
+      // sum[0] = Sum over k from 0 to ILP: norm[0 + k + yi * nx_p] * norm[0 + k + yj * nx_p];
+      // sum[1] = Sum over k from 0 to ILP: norm[ILP + k + yi * nx_p] * norm[ILP + k + yj * nx_p];
 
       double total = 0;
       for (int k = 0; k < ILP; k++)
