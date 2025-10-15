@@ -21,6 +21,7 @@
  * - using for loop with update of i += unwind like Joseph actually makes it slower: 4:00 -> 4:20
  *
  * - Joseph's version runs at 3.77s for online grading
+ * - this version is running at 3.68s
  */
 
 void normalize_rows(int a, int nx, const float *data, double *normalized) {
