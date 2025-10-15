@@ -18,7 +18,7 @@
  * Modifications:
  * - pass the correlation vector to correlate_rows instead of initializing in each loop: no significant difference
  * - use double *normalized[] instead of std::vector: small improvement in speed
- * - using for loop with update of i += unwind like Joseph does actually made it slower: 4:00 -> 4:20
+ * - using for loop with update of i += unwind like Joseph actually makes it slower: 4:00 -> 4:20
  */
 
 void normalize_rows(int a, int nx, const float *data, double *normalized) {
