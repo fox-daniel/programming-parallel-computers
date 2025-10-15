@@ -19,6 +19,8 @@
  * - pass the correlation vector to correlate_rows instead of initializing in each loop: no significant difference
  * - use double *normalized[] instead of std::vector: small improvement in speed
  * - using for loop with update of i += unwind like Joseph actually makes it slower: 4:00 -> 4:20
+ *
+ * - Joseph's version runs at 3.77s for online grading
  */
 
 void normalize_rows(int a, int nx, const float *data, double *normalized) {
@@ -84,14 +86,15 @@ This is the function you need to implement. Quick reference:
 void correlate(int ny, int nx, const float *data, float *result) {
     // std::vector<double> normalized(ny*nx);
     double *normalized = new double[ny*nx]{};
-    const int unwind = 8;
+    // unwind = 4 is better for the online
+    const int unwind = 4;
     for (int i=0; i<ny; i++) {
         normalize_rows(i, nx, data, normalized);
     }
     // complexity: ny*nx
     for (int i=0; i<ny; i++) {
         for (int j=0; j<=i; j++) {
-            double *correlation = new double[unwind+1]{};
+            double correlation[unwind+1] = {};
             result[i+j*ny] = correlate_rows(i, j, nx, normalized, unwind, correlation);
         }
     }
