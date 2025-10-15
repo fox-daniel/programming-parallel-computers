@@ -45,10 +45,8 @@ void normalize_rows(int a, int nx, const float *data, double *normalized) {
 }
 
 
-float correlate_rows(int a, int b, int nx, double *normalized) {
+float correlate_rows(int a, int b, int nx, double *normalized, int unwind, double *correlation) {
     double total_correlation = 0;
-    const int unwind = 8;
-    std::vector<double> correlation(unwind+1);
     // unwinding factor of 8 is slightly better than 4 in the online eval (4'13" vs 4'24")
     int nxw = floor(nx / unwind);
     // initialize the chunks of the correlation
@@ -86,13 +84,15 @@ This is the function you need to implement. Quick reference:
 void correlate(int ny, int nx, const float *data, float *result) {
     // std::vector<double> normalized(ny*nx);
     double *normalized = new double[ny*nx]{};
+    const int unwind = 8;
     for (int i=0; i<ny; i++) {
         normalize_rows(i, nx, data, normalized);
     }
     // complexity: ny*nx
     for (int i=0; i<ny; i++) {
         for (int j=0; j<=i; j++) {
-            result[i+j*ny] = correlate_rows(i, j, nx, normalized);
+            double *correlation = new double[unwind+1]{};
+            result[i+j*ny] = correlate_rows(i, j, nx, normalized, unwind, correlation);
         }
     }
     delete[] normalized;
