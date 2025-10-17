@@ -1,11 +1,9 @@
 #include <vector>
 #include <cmath>
 
-
-typedef float float8_t __attribute__ ((vector_size (8 * sizeof(float))));
 typedef double double4_t __attribute__ ((vector_size (4 * sizeof(double))));
 
-double4_t float4_to_double4(float x1, float x2, float x3, float x4) {
+double4_t double_to_double4(double x1, double x2, double x3, double x4) {
     return (double4_t){(double)x1, (double)x2, (double)x3, (double)x4};
 }
 
@@ -23,7 +21,12 @@ void convert_dtype(int ny, int nx, int m, std::vector<double>& pdata, std::vecto
 
     for (int i=0; i<ny; i+=1) {
         for (int j=0; j<nx; j += 4) {
-            vdata[j/4 + m*i] = float4_to_double4(pdata[j + nx*i], pdata[1 + j + nx*i], pdata[2 + j + nx*i], pdata[3 + j + nx*i]);
+            vdata[j/4 + m*i] = double_to_double4(
+                pdata[j + nx*i],
+                pdata[1 + j + nx*i],
+                pdata[2 + j + nx*i],
+                pdata[3 + j + nx*i]
+            );
         }
     }
 }
@@ -32,12 +35,10 @@ void convert_dtype(int ny, int nx, int m, std::vector<double>& pdata, std::vecto
 void normalize_rows(int a, int nx, const float *data, std::vector<double>& normalized) {
     double mean = 0;
     double len = 0;
-    asm("# begin mean");
     for (int k=0; k<nx; k++) {
         mean += data[k + a*nx];
     }
     mean = mean / nx;
-    asm("# end mean");
     for (int k=0; k<nx; k++) {
         normalized[k+ a*nx] = data[k + a*nx] - mean;
    }
@@ -70,7 +71,7 @@ This is the function you need to implement. Quick reference:
 - only parts with 0 <= j <= i < ny need to be filled
 */
 void correlate(int ny, int nx, const float *data, float *result) {
-    std::vector<double> normalized(ny*nx);
+    std::vector<double> normalized(ny * nx);
     for (int i=0; i<ny; i++) {
         normalize_rows(i, nx, data, normalized);
     }
